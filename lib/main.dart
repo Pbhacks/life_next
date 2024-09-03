@@ -1,25 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'chats_page.dart'; // Import the ChatsPage from chats_page.dart
 
-// Main entry point of the application
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Life Next Messenger',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.light().copyWith(
+        primaryColor: Colors.white,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.black),
+          bodyMedium: TextStyle(color: Colors.black54),
+        ),
+        colorScheme:
+            ColorScheme.fromSwatch().copyWith(secondary: Colors.blueAccent),
+        bottomAppBarTheme: BottomAppBarTheme(color: Colors.grey[200]),
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        primaryColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+        ),
+        colorScheme:
+            ColorScheme.fromSwatch().copyWith(secondary: Colors.redAccent),
+        bottomAppBarTheme: BottomAppBarTheme(color: Colors.grey[900]),
+      ),
+      themeMode: ThemeMode.system, // Switch based on system settings
       home: SplashScreen(),
     );
   }
 }
 
-// Splash Screen
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -58,7 +92,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// Login, Signup, Forgot Password Screen
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -239,42 +272,56 @@ class _LoginScreenState extends State<LoginScreen> {
 
 enum FormMode { login, signup, forgotPassword }
 
-// Main Chats Page (unchanged)
 class MainChatsPage extends StatefulWidget {
   @override
   _MainChatsPageState createState() => _MainChatsPageState();
 }
 
 class _MainChatsPageState extends State<MainChatsPage> {
+  int _selectedIndex = 0;
+  final List<Color> _colors = [
+    const Color.fromARGB(255, 3, 51, 90),
+    const Color.fromARGB(255, 13, 126, 17),
+    const Color.fromARGB(255, 93, 5, 109),
+    const Color.fromARGB(255, 155, 95, 6),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Chats'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person_add),
-            onPressed: () {
-              // Logic to invite contacts
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Invite contacts feature')),
-              );
-            },
-          ),
+      body: _getPage(_selectedIndex),
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Colors.transparent,
+        items: <Widget>[
+          Icon(Icons.chat, size: 30),
+          Icon(Icons.flash_on, size: 30),
+          Icon(Icons.star, size: 30),
+          Icon(Icons.settings, size: 30),
         ],
-      ),
-      body: ListView(
-        children: [
-          ListTile(title: Text('Chat 1')),
-          ListTile(title: Text('Chat 2')),
-        ],
+        color: _colors[_selectedIndex],
+        index: _selectedIndex,
+        height: 50,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }
-}
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return ChatsPage(bgColor: Colors.transparent); // Your chat page
+      case 1:
+        return Center(child: Text('Discover'));
+      case 2:
+        return Center(child: Text('Favorites'));
+      case 3:
+        return Center(child: Text('Settings'));
+      default:
+        return Center(child: Text('Unknown'));
+    }
+  }
 }
